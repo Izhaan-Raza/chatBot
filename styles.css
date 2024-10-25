@@ -1,6 +1,7 @@
 body {
     font-family: Arial, sans-serif;
-    background: url(abc.jpeg);
+    /* background: url(abc.jpeg); */
+    background: transparent;
     background-position: center;
     background-size: cover;
     margin: 0;
@@ -9,6 +10,7 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
+    background: rgb(174, 174, 174);
   }
   
   .chat-container {
@@ -23,14 +25,7 @@ body {
     backdrop-filter: blur(15px) saturate(150%); /* Adjust blur and saturation */
   }
   
-  h1 {
-    text-align: center;
-    padding: 10px;
-    background-color: rgba(128, 128, 128, 0.214); /* Semi-transparent background */
-    color: white;
-    margin: 0;
-    border-radius: 8px 8px 0 0;
-  }
+
   
   .chat-window {
     flex-grow: 1;
@@ -52,7 +47,7 @@ body {
   
   .user-message {
     background-color: #00ff33;
-    color: white;
+    color: rgb(58, 58, 58);
     align-self: flex-end;
   }
   
