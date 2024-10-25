@@ -1,6 +1,6 @@
 body {
   font-family: Arial, sans-serif;
-  background-color: transparent; /* Light gray for less eye strain */
+  background-color: transparent;
   margin: 0;
   padding: 0;
   display: flex;
@@ -14,7 +14,7 @@ body {
   max-width: 600px;
   width: 100%;
   height: 80%;
-  background-color: #ffffff; /* Soft white background */
+  background-color: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   display: flex;
@@ -29,7 +29,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  background-color: #fafafa; /* Light gray background for messages */
+  background-color: #fafafa;
 }
 
 .message {
@@ -39,20 +39,23 @@ body {
   font-size: 15px;
   word-wrap: break-word;
   line-height: 1.5;
+  transition: transform 0.3s ease;
 }
 
 .user-message {
-  background-color: #d1e7ff; /* Light blue for user messages */
+  background-color: #d1e7ff;
   color: #1a1a1a;
   align-self: flex-end;
   border-radius: 12px 12px 0px 12px;
+  transform: translateY(10px);
 }
 
 .bot-message {
-  background-color: #e8e8e8; /* Soft gray for bot messages */
+  background-color: #e8e8e8;
   color: #333333;
   align-self: flex-start;
   border-radius: 12px 12px 12px 0px;
+  transform: translateY(10px);
 }
 
 .input-container {
@@ -60,7 +63,7 @@ body {
   align-items: center;
   border-top: 1px solid #ddd;
   padding: 12px;
-  background-color: #f9f9f9; /* Very light gray for input container */
+  background-color: #f9f9f9;
 }
 
 textarea {
@@ -69,16 +72,22 @@ textarea {
   border-radius: 15px;
   border: 1px solid #ccc;
   resize: none;
-  background-color: #f0f0f0; /* Light gray for input background */
+  background-color: #f0f0f0;
   color: #333;
   font-size: 15px;
   outline: none;
+  transition: border-color 0.3s;
+}
+
+textarea:focus {
+  border-color: #007acc;
+  box-shadow: 0 0 5px rgba(0, 122, 204, 0.5);
 }
 
 button {
   margin-left: 10px;
   padding: 10px 16px;
-  background-color: #007acc; /* Soft blue */
+  background-color: #007acc;
   color: #fff;
   border: none;
   border-radius: 50px;
@@ -87,5 +96,13 @@ button {
 }
 
 button:hover {
-  background-color: #005fa3; /* Darker blue on hover */
+  background-color: #005fa3;
+}
+
+button:active {
+  background-color: #004a80;
+}
+
+.message.show {
+  transform: translateY(0);
 }
