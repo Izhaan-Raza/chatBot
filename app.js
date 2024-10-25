@@ -1,104 +1,87 @@
-import React, { useState } from 'react';
-import { Heart, Activity, Moon } from 'lucide-react';
-import { Navigation } from './components/Navigation';
-import { DashboardCard } from './components/DashboardCard';
-import { HeartRateChart } from './components/HeartRateChart';
-import { ECGChart } from './components/ECGChart';
-import { SleepChart } from './components/SleepChart';
-import { EmergencySOS } from './components/EmergencySOS';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-export type Page = 'health' | 'sos' | 'ai';
+const API_KEY = 'AIzaSyC6ffbJ4ppz9MUEl5nh5Cs5LAvuc239vM4'; // Replace with your actual API key
+const genAI = new GoogleGenerativeAI(API_KEY);
 
-function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('health');
-  const [iframeLoading, setIframeLoading] = useState(true);
+// Define the default prompt
+const defaultPrompt = "You are a healthcare assistant for cardiac patients. Provide medical guidance, lifestyle tips, and answer questions related to heart health. Respond with empathy and professionalism.";
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation currentPage={currentPage} onPageChange={setCurrentPage} />
+// Initialize conversation history
+let conversationHistory = `${defaultPrompt}\n`;
 
-      {currentPage === 'health' && (
-        <>
-          <header className="bg-white shadow-sm">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-              <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold text-gray-900">Health Dashboard</h1>
-                <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-500">Last updated: {new Date().toLocaleTimeString()}</span>
-                </div>
-              </div>
-            </div>
-          </header>
+// Handle form submission
+document.getElementById('promptForm').addEventListener('submit', async function(event) {
+  event.preventDefault();
 
-          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <DashboardCard
-                title="Heart Rate"
-                icon={<Heart className="w-6 h-6 text-red-500" />}
-              >
-                <div className="mb-4">
-                  <div className="flex items-baseline">
-                    <span className="text-4xl font-bold text-gray-900">72</span>
-                    <span className="ml-2 text-gray-500">BPM</span>
-                  </div>
-                  <p className="text-sm text-gray-500">Average today</p>
-                </div>
-                <HeartRateChart />
-              </DashboardCard>
+  const prompt = document.getElementById('prompt').value;
+  if (prompt.trim() === '') return;
 
-              <DashboardCard
-                title="ECG"
-                icon={<Activity className="w-6 h-6 text-red-500" />}
-              >
-                <div className="mb-4">
-                  <p className="text-sm text-gray-500">Real-time monitoring</p>
-                </div>
-                <ECGChart />
-              </DashboardCard>
+  addMessageToChat(prompt, 'user-message');
+  
+  // Append the user message to the conversation history
+  conversationHistory += `User: ${prompt}\n`;
 
-              <DashboardCard
-                title="Sleep Analysis"
-                icon={<Moon className="w-6 h-6 text-blue-500" />}
-              >
-                <div className="mb-4">
-                  <div className="flex items-baseline">
-                    <span className="text-4xl font-bold text-gray-900">3</span>
-                    <span className="ml-2 text-gray-500">hours</span>
-                  </div>
-                  <p className="text-sm text-gray-500">Last night's sleep</p>
-                </div>
-                <SleepChart />
-              </DashboardCard>
-            </div>
-          </main>
-        </>
-      )}
+  document.getElementById('prompt').value = '';
 
-      {currentPage === 'sos' && <EmergencySOS />}
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-      {currentPage === 'ai' && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-3xl font-bold text-gray-900">AI Help</h1>
-          
-          {iframeLoading && (
-            <div className="flex justify-center items-center py-20">
-              <div className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full" role="status">
-                <span className="sr-only">Loading...</span>
-              </div>
-            </div>
-          )}
+    // Generate content with conversation history
+    const result = await model.generateContent(conversationHistory);
+    
+    const botResponse = result.response.text();
 
-          <iframe
-            src="https://izhaan-raza.github.io/chatBot/"
-            width="100%"
-            height="600px"
-            onLoad={() => setIframeLoading(false)}
-            style={{ display: iframeLoading ? 'none' : 'block' }}
-          />
-        </div>
-      )}
-    </div>
-  );
+    // Append bot response to the conversation history
+    conversationHistory += `Bot: ${botResponse}\n`;
+
+    // Typewriter effect for bot's response
+    addMessageToChat(botResponse, 'bot-message');
+
+    // Optional: Limit the history length to the last few messages
+    if (conversationHistory.length > 2000) {
+      conversationHistory = `${defaultPrompt}\n` + conversationHistory.slice(-1500); // Adjust slice as needed
+    }
+    
+  } catch (error) {
+    addMessageToChat(`Error: ${error.message}`, 'bot-message');
+  }
+});
+
+// Prevent Enter key from adding a newline in the textarea
+document.getElementById('prompt').addEventListener('keydown', function(event) {
+  if (event.key === 'Enter') {
+    event.preventDefault(); // Prevent newline
+    document.getElementById('promptForm').dispatchEvent(new Event('submit')); // Trigger form submission
+  }
+});
+
+function addMessageToChat(text, className) {
+  const chatWindow = document.getElementById('chatWindow');
+
+  const messageDiv = document.createElement('div');
+  messageDiv.classList.add('message', className);
+
+  // Apply typewriter effect for bot responses
+  if (className === 'bot-message') {
+    typeWriterEffect(text, messageDiv);
+  } else {
+    messageDiv.textContent = text;
+  }
+
+  chatWindow.appendChild(messageDiv);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
-export default App;
+function typeWriterEffect(text, element) {
+  let index = 0;
+
+  function typeNextChar() {
+    if (index < text.length) {
+      element.textContent += text.charAt(index);
+      index++;
+      setTimeout(typeNextChar, 30); // Adjust typing speed here (milliseconds)
+    }
+  }
+
+  typeNextChar();
+}
