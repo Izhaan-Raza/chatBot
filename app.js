@@ -1,14 +1,11 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const API_KEY = 'AIzaSyC6ffbJ4ppz9MUEl5nh5Cs5LAvuc239vM4'; 
+const API_KEY = 'AIzaSyARB4TSTJT1FRU0vsi2l7RPIUcHg1vyGfc'; 
 const genAI = new GoogleGenerativeAI(API_KEY);
 
-
-const defaultPrompt = "You are a healthcare assistant for cardiac patients. your name is CardioCare Provide medical guidance, lifestyle tips, and answer questions related to heart health. Respond with empathy and be friendly include emojis in responses and dont add ** for bullets just add line spacing. Don't say 'I understand', just get the point. Keep it short and precise. for listing points dont use * or  ** just go to next line and use square or cicle emojis press shift + entre to go to next line. no need to say i am cardiocare after each response ";
-
+const defaultPrompt = "You are assigned as cardiac patient assistance chat bot. You are not allowed to share any info other than cardiac. The patient's name is Izhaan Raza, age 35, heart patient. Give friendly yet precise responses. Avoid phrases like 'I understand' and keep responses short. Use emojis like 🔵 or 🔴 for points. Provide first aid advice when needed. Patient is Indian, so 911 should not be referenced.";
 
 let conversationHistory = `${defaultPrompt}\n`;
-
 
 document.getElementById('promptForm').addEventListener('submit', async function(event) {
   event.preventDefault();
@@ -18,35 +15,28 @@ document.getElementById('promptForm').addEventListener('submit', async function(
 
   addMessageToChat(prompt, 'user-message');
 
-  
   conversationHistory += `User: ${prompt}\n`;
-
   document.getElementById('prompt').value = '';
 
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-    
     const result = await model.generateContent(conversationHistory);
-
     const botResponse = result.response.text();
 
-    
     conversationHistory += `${botResponse}\n`;
-
-    
     addMessageToChat(botResponse, 'bot-message');
 
-    
     const botMessageDiv = document.querySelector('.bot-message:last-child');
     botMessageDiv.innerHTML = ''; 
     typeWriterEffect(botResponse, botMessageDiv);
+
+    // Call Text-to-Speech for the bot's response
+    // speakText(botResponse);
 
   } catch (error) {
     addMessageToChat(`Error: ${error.message}`, 'bot-message');
   }
 });
-
 
 document.getElementById('prompt').addEventListener('keydown', function(event) {
   if (event.key === 'Enter') {
@@ -60,15 +50,13 @@ function addMessageToChat(text, className) {
 
   const messageDiv = document.createElement('div');
   messageDiv.classList.add('message', className);
-  
-  messageDiv.innerHTML = text; 
+  messageDiv.innerHTML = text;
   chatWindow.appendChild(messageDiv);
   chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
 function typeWriterEffect(text, element) {
   let index = 0;
-
   function typeNextChar() {
     if (index < text.length) {
       element.innerHTML += text.charAt(index);
@@ -76,6 +64,15 @@ function typeWriterEffect(text, element) {
       setTimeout(typeNextChar, 30); 
     }
   }
-
   typeNextChar();
 }
+
+// Text-to-Speech Function
+// function speakText(text) {
+//   const utterance = new SpeechSynthesisUtterance(text);
+//   utterance.lang = 'en-IN'; // Set language and accent (Indian English)
+//   utterance.rate = 1;       // Set rate of speech, 1 is normal speed
+//   utterance.pitch = 1;      // Set pitch, 1 is default
+
+//   window.speechSynthesis.speak(utterance);
+// }
